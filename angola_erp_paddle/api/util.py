@@ -12,44 +12,47 @@ import frappe
 
 from paddleocr import PaddleOCR,draw_ocr
 
+import os
 
 
 @frappe.whitelist(allow_guest=True)
 def paddle_ocr_TEST(data,action = "OCR PLATES",tipodoctype = None):
 	print ('OCR para Vehicle Plates...')
-    if action == "OCR PLATES":
-    	if os.path.isfile(frappe.get_site_path('public','files') + data.replace('/files','')):
-    		filefinal = frappe.get_site_path('public','files') + data.replace('/files','')
-    		print ('filefinal ',filefinal)
-    		if filefinal.startswith('.'):
-    			filefinal1 = "/home/frappe/frappe-bench/sites" + filefinal[1:len(filefinal)]
-    			filefinal = filefinal1
-    		print ('filefinal1 ',filefinal)
+	if action == "OCR PLATES":
+		if os.path.isfile(frappe.get_site_path('public','files') + data.replace('/files','')):
+			filefinal = frappe.get_site_path('public','files') + data.replace('/files','')
+			print ('filefinal ',filefinal)
+			if filefinal.startswith('.'):
+				filefinal1 = "/home/frappe/frappe-bench/sites" + filefinal[1:len(filefinal)]
+				filefinal = filefinal1
+			print ('filefinal1 ',filefinal)
 
-    	else:
-    		filefinal = data
+		else:
+			filefinal = data
 
-        #OCR IMAGE
-        ocr = PaddleOCR(lang='en')
-        img_path = filefinal
-        result = ocr.ocr(img_path, cls=false)
-        for idx in range(len(result)):
-            res = result[idx]
-            for line in res:
-                print(line)
+		#OCR IMAGE
+		ocr = PaddleOCR(lang='en')
+		img_path = filefinal
+		result = ocr.ocr(img_path, cls=False)
+		for idx in range(len(result)):
+			res = result[idx]
+			for line in res:
+				print(line)
 
-        # draw result
-        from PIL import Image
-        result = result[0]
-        image = Image.open(img_path).convert('RGB')
-        boxes = [line[0] for line in result]
-        txts = [line[1][0] for line in result]
-        scores = [line[1][1] for line in result]
+		# draw result
+		from PIL import Image
+		result = result[0]
+		image = Image.open(img_path).convert('RGB')
+		boxes = [line[0] for line in result]
+		txts = [line[1][0] for line in result]
+		scores = [line[1][1] for line in result]
 
-        im_show = draw_ocr(image, boxes, txts, scores, font_path='/home/frappe/frappe-bench/apps/paddleocr/doc/fonts/simfang.ttf')
-        im_show = Image.fromarray(im_show)
-        im_show.save('./tmp/result.jpg')
+		#im_show = draw_ocr(image, boxes, txts, scores, font_path='/home/frappe/frappe-bench/apps/paddleocr/doc/fonts/simfang.ttf')
+		#im_show = Image.fromarray(im_show)
+		#im_show.save('./tmp/result.jpg')
+		print ('Textos no file ',txts)
+		
 
-    else:
-        print ('Por fazer....')
-        frappe.throw('Por Fazer...')
+	else:
+		print ('Por fazer....')
+		frappe.throw('Por Fazer...')
