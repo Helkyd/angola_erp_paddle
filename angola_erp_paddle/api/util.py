@@ -120,9 +120,6 @@ def paddle_ocr(data: str,action = "OCR PLATES",tipodoctype = None):
 			txts = [line[1][0] for line in result]
 			scores = [line[1][1] for line in result]
 
-			#im_show = draw_ocr(image, boxes, txts, scores, font_path='/home/frappe/frappe-bench/apps/paddleocr/doc/fonts/simfang.ttf')
-			#im_show = Image.fromarray(im_show)
-			#im_show.save('./tmp/result.jpg')
 			print ('Textos no file ',txts)
 
 	else:
