@@ -59,8 +59,9 @@ def paddle_ocr_TEST(data,action = "OCR PLATES",tipodoctype = None):
 
 
 @frappe.whitelist(allow_guest=True)
-def paddle_ocr(img: np.array, data: str,action = "OCR PLATES",tipodoctype = None):
+def paddle_ocr(data: str,action = "OCR PLATES",tipodoctype = None):
 	print ('OCR para Vehicle Plates...')
+	print (data)
 	if action == "OCR PLATES":
 		if data:
 			if os.path.isfile(frappe.get_site_path('public','files') + data.replace('/files','')):
@@ -95,6 +96,7 @@ def paddle_ocr(img: np.array, data: str,action = "OCR PLATES",tipodoctype = None
 			#im_show = Image.fromarray(im_show)
 			#im_show.save('./tmp/result.jpg')
 			print ('Textos no file ',txts)
+			return txts
 		else:
 			#Image DAta
 			print ('DATA imagem ')
@@ -110,7 +112,7 @@ def paddle_ocr(img: np.array, data: str,action = "OCR PLATES",tipodoctype = None
 			# draw result
 			print ('Textos no file ',txts)
 			if img:
-				return txts			
+				return txts
 			from PIL import Image
 			result = result[0]
 			image = Image.open(img_path).convert('RGB')
