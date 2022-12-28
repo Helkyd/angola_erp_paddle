@@ -60,7 +60,9 @@ def paddle_ocr_TEST(data,action = "OCR PLATES",tipodoctype = None):
 
 
 @frappe.whitelist(allow_guest=True)
-def paddle_ocr(data: str,action = "OCR PLATES",tipodoctype = None):
+def paddle_ocr(data: str,opcao='batch',action = "OCR PLATES",tipodoctype = None):
+	''' opcao pode ser batch to execute RUN or code to run via code '''
+
 	print ('OCR para Vehicle Plates...')
 	print (data)
 	if action == "OCR PLATES":
@@ -76,30 +78,53 @@ def paddle_ocr(data: str,action = "OCR PLATES",tipodoctype = None):
 			else:
 				filefinal = data
 
+			if opcao == "batch":
+				print ('Teste usando SHELL')
+				from subprocess import run
 
+				run_ppocr = 'python3 /home/frappe/frappe-bench/apps/paddleocr/tools/infer/predict_system.py --det_model_dir="/home/frappe/frappe-bench/apps/paddleocr/en_PP-OCRv3_det_infer/" ' \
+				'--cls_model_dir="/home/frappe/frappe-bench/apps/paddleocr/ch_ppocr_mobile_v2.0_cls_infer/" ' \
+				'--rec_model_dir="/home/frappe/frappe-bench/apps/paddleocr/en_PP-OCRv3_rec_infer/" ' \
+				'--rec_char_dict_path="/home/frappe/frappe-bench/apps/paddleocr/ppocr/utils/en_dict.txt" ' \
+				'--image_dir=' + filefinal1
 
-			print ('Teste usando SHELL')
-			from subprocess import run
+				print ('run_ppocr ',run_ppocr)
+				dados = run(run_ppocr,capture_output=True,shell=True)
+				print ('dados.stdout')
+				print (dados.stdout)
+				print ('dados.stderr')
+				print (dados.stderr)
+				print (len(dados.stdout.decode('utf-8').split('ppocr DEBUG:')))
+				print (dados.stdout.decode('utf-8').split('ppocr DEBUG:'))
 
-			run_ppocr = 'python3 /home/frappe/frappe-bench/apps/paddleocr/tools/infer/predict_system.py --det_model_dir="/home/frappe/frappe-bench/apps/paddleocr/en_PP-OCRv3_det_infer/" ' \
-			'--cls_model_dir="/home/frappe/frappe-bench/apps/paddleocr/ch_ppocr_mobile_v2.0_cls_infer/" ' \
-			'--rec_model_dir="/home/frappe/frappe-bench/apps/paddleocr/en_PP-OCRv3_rec_infer/" ' \
-			'--rec_char_dict_path="/home/frappe/frappe-bench/apps/paddleocr/ppocr/utils/en_dict.txt" ' \
-			'--image_dir=' + filefinal1
+				tmp_matricula = dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-2], dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-1]
 
-			print ('run_ppocr ',run_ppocr)
-			dados = run(run_ppocr,capture_output=True,shell=True)
-			print ('dados.stdout')
-			print (dados.stdout)
-			print ('dados.stderr')
-			print (dados.stderr)
-			print (len(dados.stdout.decode('utf-8').split('ppocr DEBUG:')))
-			print (dados.stdout.decode('utf-8').split('ppocr DEBUG:'))
+			else:
+				print ('Opcao CODE')
+				#OCR IMAGE
+				#ocr = PaddleOCR(lang='en')
+				ocr = PaddleOCR(lang='en',show_log=False)
+				img_path = filefinal
+				result = ocr.ocr(img_path, cls=False)
+				'''
+				for idx in range(len(result)):
+					res = result[idx]
+					for line in res:
+						print(line)
+				'''
+
+				# draw result
+				result = result[0]
+				boxes = [line[0] for line in result]
+				txts = [line[1][0] for line in result]
+				scores = [line[1][1] for line in result]
+				print ('Textos no file ',txts)
+				tmp_matricula = txts
 
 			#RETURNS Vehicle PLATE ....
 			matricula_final = 'MATRICULA INVALIDA'
 			regex = r"^[a-zA-Z]{2}[\\s-]{0,1}[0-9]{2}[\\s-]{0,1}[0-9]{1,2}[\\s-]{0,1}[a-zA-Z]{2}$|^[a-zA-Z]{3}[\\s-]{0,1}[0-9]{2}[\\s-]{0,1}[0-9]{1,2}[\\s-]{0,1}$|^[0-9]{3}[\\s-]{0,1}[a-zA-Z]{2}[\\s-]{0,1}[0-9]{2,3}$|^[a-zA-Z]{2}[\\s-]{0,1}[0-9]{3}[\\s-]{0,1}[0-9]{2}$"
-			tmp_matricula = dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-2], dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-1]
+
 			print ('len tmp_matricula ', len(tmp_matricula))
 			for ttmatr in tmp_matricula:
 				if ttmatr.find('Predict time of') == -1:
