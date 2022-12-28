@@ -95,7 +95,7 @@ def paddle_ocr(data: str,action = "OCR PLATES",tipodoctype = None):
 			print (len(dados.stdout.decode('utf-8').split('ppocr DEBUG:')))
 			print (dados.stdout.decode('utf-8').split('ppocr DEBUG:'))
 
-			return (dados.stdout.decode('utf-8').split('ppocr DEBUG:'))
+			return (dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-2], dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-1])
 
 
 			#OCR IMAGE
@@ -202,3 +202,31 @@ def ocrpdf_tools(ficheiro,action = "SCRAPE", empresa = None, tipodoctype = None,
 
 	print ('Fiche Private/Public ', filefinal)
 	ficheiro = filefinal
+
+@frappe.whitelist(allow_guest=True)
+def paddle_ocr_PING():
+	print ('CHEGOU AQu......')
+
+	print ('Teste usando SHELL')
+	from subprocess import run
+
+	run_ppocr = 'python3 /home/frappe/frappe-bench/apps/paddleocr/tools/infer/predict_system.py --det_model_dir="/home/frappe/frappe-bench/apps/paddleocr/en_PP-OCRv3_det_infer/" ' \
+	'--cls_model_dir="/home/frappe/frappe-bench/apps/paddleocr/ch_ppocr_mobile_v2.0_cls_infer/" ' \
+	'--rec_model_dir="/home/frappe/frappe-bench/apps/paddleocr/en_PP-OCRv3_rec_infer/" ' \
+	'--rec_char_dict_path="/home/frappe/frappe-bench/apps/paddleocr/ppocr/utils/en_dict.txt" ' \
+	'--image_dir="/home/frappe/frappe-bench/sites/paddle.angolaerp.co.ao/public/files/1672239685486673.png"'
+
+	print ('run_ppocr ',run_ppocr)
+	dados = run(run_ppocr,capture_output=True,shell=True)
+	print ('dados.stdout')
+	print (dados.stdout)
+	print ('dados.stderr')
+	print (dados.stderr)
+	print (len(dados.stdout.decode('utf-8').split('ppocr DEBUG:')))
+	print (dados.stdout.decode('utf-8').split('ppocr DEBUG:'))
+	print ('RETURN SREA')
+	print (dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-2], dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-1])
+
+	return (dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-2], dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-1])
+
+	return "PONG"
