@@ -87,16 +87,17 @@ def paddle_ocr(data: str,action = "OCR PLATES",tipodoctype = None):
 			# draw result
 			from PIL import Image
 			result = result[0]
-			image = Image.open(img_path).convert('RGB')
 			boxes = [line[0] for line in result]
 			txts = [line[1][0] for line in result]
 			scores = [line[1][1] for line in result]
+			print ('Textos no file ',txts)
+			return (txts)
+
+			#image = Image.open(img_path).convert('RGB')
 
 			#im_show = draw_ocr(image, boxes, txts, scores, font_path='/home/frappe/frappe-bench/apps/paddleocr/doc/fonts/simfang.ttf')
 			#im_show = Image.fromarray(im_show)
 			#im_show.save('./tmp/result.jpg')
-			print ('Textos no file ',txts)
-			return txts
 		else:
 			#Image DAta
 			print ('DATA imagem ')
@@ -120,7 +121,7 @@ def paddle_ocr(data: str,action = "OCR PLATES",tipodoctype = None):
 			txts = [line[1][0] for line in result]
 			scores = [line[1][1] for line in result]
 
-			print ('Textos no file ',txts)
+			print ('Textos no file000 ',txts)
 
 	else:
 		print ('Por fazer....')
