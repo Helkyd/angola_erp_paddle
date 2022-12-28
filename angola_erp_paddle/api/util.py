@@ -14,6 +14,7 @@ from paddleocr import PaddleOCR,draw_ocr
 
 import os
 import numpy as np
+import re
 
 @frappe.whitelist(allow_guest=True)
 def paddle_ocr_TEST(data,action = "OCR PLATES",tipodoctype = None):
@@ -95,7 +96,30 @@ def paddle_ocr(data: str,action = "OCR PLATES",tipodoctype = None):
 			print (len(dados.stdout.decode('utf-8').split('ppocr DEBUG:')))
 			print (dados.stdout.decode('utf-8').split('ppocr DEBUG:'))
 
-			return (dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-2], dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-1])
+			#RETURNS Vehicle PLATE ....
+			matricula_final = 'MATRICULA INVALIDA'
+			regex = r"^[a-zA-Z]{2}[\\s-]{0,1}[0-9]{2}[\\s-]{0,1}[0-9]{1,2}[\\s-]{0,1}[a-zA-Z]{2}$|^[a-zA-Z]{3}[\\s-]{0,1}[0-9]{2}[\\s-]{0,1}[0-9]{1,2}[\\s-]{0,1}$|^[0-9]{3}[\\s-]{0,1}[a-zA-Z]{2}[\\s-]{0,1}[0-9]{2,3}$|^[a-zA-Z]{2}[\\s-]{0,1}[0-9]{3}[\\s-]{0,1}[0-9]{2}$"
+			tmp_matricula = dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-2], dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-1]
+			print ('len tmp_matricula ', len(tmp_matricula))
+			for ttmatr in tmp_matricula:
+				if ttmatr.find('Predict time of') == -1:
+					#Possible plate
+					mm = ttmatr.replace(':','-').replace(',','')
+					#Trying to match plate regex
+					matches = re.finditer(regex,mm.split()[0])
+					for matchNum, match in enumerate(matches, start=1):
+						print ("Match {matchNum} was found at {start}-{end}: {match}".format(matchNum = matchNum, start = match.start(), end = match.end(), match = match.group()))
+						for groupNum in range(0, len(match.groups())):
+							groupNum = groupNum + 1
+							print ("Group {groupNum} found at {start}-{end}: {group}".format(groupNum = groupNum, start = match.start(groupNum), end = match.end(groupNum), group = match.group(groupNum)))
+						matricula_final = match.group()
+
+
+
+			print ('Matricula final... ', matricula_final)
+			return matricula_final
+
+			#return (dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-2], dados.stdout.decode('utf-8').split('ppocr DEBUG:')[len(dados.stdout.decode('utf-8').split('ppocr DEBUG:'))-1])
 
 
 			#OCR IMAGE
