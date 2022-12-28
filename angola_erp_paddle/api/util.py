@@ -75,6 +75,29 @@ def paddle_ocr(data: str,action = "OCR PLATES",tipodoctype = None):
 			else:
 				filefinal = data
 
+
+
+			print ('Teste usando SHELL')
+			from subprocess import run
+
+			run_ppocr = 'python3 /home/frappe/frappe-bench/apps/paddleocr/tools/infer/predict_system.py --det_model_dir="/home/frappe/frappe-bench/apps/paddleocr/en_PP-OCRv3_det_infer/" ' \
+			'--cls_model_dir="/home/frappe/frappe-bench/apps/paddleocr/ch_ppocr_mobile_v2.0_cls_infer/" ' \
+			'--rec_model_dir="/home/frappe/frappe-bench/apps/paddleocr/en_PP-OCRv3_rec_infer/" ' \
+			'--rec_char_dict_path="/home/frappe/frappe-bench/apps/paddleocr/ppocr/utils/en_dict.txt" ' \
+			'--image_dir=' + filefinal1
+
+			print ('run_ppocr ',run_ppocr)
+			dados = run(run_ppocr,capture_output=True,shell=True)
+			print ('dados.stdout')
+			print (dados.stdout)
+			print ('dados.stderr')
+			print (dados.stderr)
+			print (len(dados.stdout.decode('utf-8').split('ppocr DEBUG:')))
+			print (dados.stdout.decode('utf-8').split('ppocr DEBUG:'))
+
+			return (dados.stdout.decode('utf-8').split('ppocr DEBUG:'))
+
+
 			#OCR IMAGE
 			#ocr = PaddleOCR(lang='en')
 			ocr = PaddleOCR(lang='en',show_log=False)
