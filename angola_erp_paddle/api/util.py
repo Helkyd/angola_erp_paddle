@@ -126,10 +126,13 @@ def paddle_ocr(data: str,opcao='batch',action = "OCR PLATES",tipodoctype = None)
 			regex = r"^[a-zA-Z]{2}[\\s-]{0,1}[0-9]{2}[\\s-]{0,1}[0-9]{1,2}[\\s-]{0,1}[a-zA-Z]{2}$|^[a-zA-Z]{3}[\\s-]{0,1}[0-9]{2}[\\s-]{0,1}[0-9]{1,2}[\\s-]{0,1}$|^[0-9]{3}[\\s-]{0,1}[a-zA-Z]{2}[\\s-]{0,1}[0-9]{2,3}$|^[a-zA-Z]{2}[\\s-]{0,1}[0-9]{3}[\\s-]{0,1}[0-9]{2}$"
 
 			print ('len tmp_matricula ', len(tmp_matricula))
+			print ('tmp_matricula ',tmp_matricula)
 			for ttmatr in tmp_matricula:
+				print ('ttmatr ',ttmatr)
 				if ttmatr.find('Predict time of') == -1:
 					#Possible plate
-					mm = ttmatr.replace(':','-').replace(',','')
+					print (ttmatr.split(',')[0])
+					mm = ttmatr.split(',')[0].replace(':','-').replace(' ','') # ttmatr.replace(':','-').replace(',','')
 					#Trying to match plate regex
 					matches = re.finditer(regex,mm.split()[0])
 					for matchNum, match in enumerate(matches, start=1):
