@@ -31,27 +31,52 @@ def paddle_ocr_TEST(data,action = "OCR PLATES",tipodoctype = None):
 		else:
 			filefinal = data
 
+		print ('Opcao CODE')
 		#OCR IMAGE
-		ocr = PaddleOCR(lang='en')
+		#ocr = PaddleOCR(lang='en')
+		ocr = PaddleOCR(lang='en',show_log=False)
 		img_path = filefinal
 		result = ocr.ocr(img_path, cls=False)
+		'''
 		for idx in range(len(result)):
 			res = result[idx]
 			for line in res:
 				print(line)
+		'''
 
 		# draw result
-		from PIL import Image
 		result = result[0]
-		image = Image.open(img_path).convert('RGB')
 		boxes = [line[0] for line in result]
 		txts = [line[1][0] for line in result]
 		scores = [line[1][1] for line in result]
-
-		#im_show = draw_ocr(image, boxes, txts, scores, font_path='/home/frappe/frappe-bench/apps/paddleocr/doc/fonts/simfang.ttf')
-		#im_show = Image.fromarray(im_show)
-		#im_show.save('./tmp/result.jpg')
 		print ('Textos no file ',txts)
+		tmp_matricula = txts
+
+		#RETURNS Vehicle PLATE ....
+		matricula_final = 'MATRICULA INVALIDA'
+		regex = r"^[a-zA-Z]{2}[\\s-]{0,1}[0-9]{2}[\\s-]{0,1}[0-9]{1,2}[\\s-]{0,1}[a-zA-Z]{2}$|^[a-zA-Z]{3}[\\s-]{0,1}[0-9]{2}[\\s-]{0,1}[0-9]{1,2}[\\s-]{0,1}$|^[0-9]{3}[\\s-]{0,1}[a-zA-Z]{2}[\\s-]{0,1}[0-9]{2,3}$|^[a-zA-Z]{2}[\\s-]{0,1}[0-9]{3}[\\s-]{0,1}[0-9]{2}$"
+
+		print ('len tmp_matricula ', len(tmp_matricula))
+		print ('tmp_matricula ',tmp_matricula)
+		for ttmatr in tmp_matricula:
+			print ('ttmatr ',ttmatr)
+			if ttmatr.find('Predict time of') == -1:
+				#Possible plate
+				print (ttmatr.split(',')[0])
+				mm = ttmatr.split(',')[0].replace(':','-').replace(' ','') # ttmatr.replace(':','-').replace(',','')
+				#Trying to match plate regex
+				matches = re.finditer(regex,mm.split()[0])
+				for matchNum, match in enumerate(matches, start=1):
+					print ("Match {matchNum} was found at {start}-{end}: {match}".format(matchNum = matchNum, start = match.start(), end = match.end(), match = match.group()))
+					for groupNum in range(0, len(match.groups())):
+						groupNum = groupNum + 1
+						print ("Group {groupNum} found at {start}-{end}: {group}".format(groupNum = groupNum, start = match.start(groupNum), end = match.end(groupNum), group = match.group(groupNum)))
+					matricula_final = match.group()
+
+
+
+		print ('Matricula final... ', matricula_final)
+		return matricula_final
 
 
 	else:
@@ -60,7 +85,7 @@ def paddle_ocr_TEST(data,action = "OCR PLATES",tipodoctype = None):
 
 
 @frappe.whitelist(allow_guest=True)
-def paddle_ocr(data: str,opcao='batch',action = "OCR PLATES",tipodoctype = None):
+def paddle_ocr(data,opcao='batch',action = "OCR PLATES",tipodoctype = None):
 	''' opcao pode ser batch to execute RUN or code to run via code '''
 
 	print ('OCR para Vehicle Plates...')
