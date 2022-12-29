@@ -107,10 +107,18 @@ def paddle_ocr(data,opcao='batch',action = "OCR PLATES",tipodoctype = None):
 				print ('Teste usando SHELL')
 				from subprocess import run
 
+				#ENG
 				run_ppocr = 'python3 /home/frappe/frappe-bench/apps/paddleocr/tools/infer/predict_system.py --det_model_dir="/home/frappe/frappe-bench/apps/paddleocr/en_PP-OCRv3_det_infer/" ' \
 				'--cls_model_dir="/home/frappe/frappe-bench/apps/paddleocr/ch_ppocr_mobile_v2.0_cls_infer/" ' \
 				'--rec_model_dir="/home/frappe/frappe-bench/apps/paddleocr/en_PP-OCRv3_rec_infer/" ' \
-				'--rec_char_dict_path="/home/frappe/frappe-bench/apps/paddleocr/ppocr/utils/en_dict.txt" ' \
+				'--rec_char_dict_path="/home/frappe/frappe-bench/apps/paddleocr/ppocr/utils/en_dict.txt" --rec_image_shape="3,32,320" ' \
+				'--image_dir=' + filefinal1
+
+				#CHIN
+				run_ppocr = 'python3 /home/frappe/frappe-bench/apps/paddleocr/tools/infer/predict_system.py --det_model_dir="/home/frappe/frappe-bench/apps/paddleocr/ch_ppocr_server_v2.0_det_infer/" ' \
+				'--cls_model_dir="/home/frappe/frappe-bench/apps/paddleocr/ch_ppocr_mobile_v2.0_cls_infer/" ' \
+				'--rec_model_dir="/home/frappe/frappe-bench/apps/paddleocr/ch_ppocr_server_v2.0_rec_infer/" ' \
+				'--rec_image_shape="3,32,320" ' \
 				'--image_dir=' + filefinal1
 
 				print ('run_ppocr ',run_ppocr)
@@ -128,7 +136,9 @@ def paddle_ocr(data,opcao='batch',action = "OCR PLATES",tipodoctype = None):
 				print ('Opcao CODE')
 				#OCR IMAGE
 				#ocr = PaddleOCR(lang='en')
-				ocr = PaddleOCR(lang='en',show_log=False)
+				#ocr = PaddleOCR(lang='en',show_log=False)
+				#ocr = PaddleOCR(lang='en',show_log=False,rec_image_shape='3,32,320')
+				ocr = PaddleOCR(lang='ch',show_log=False)
 				img_path = filefinal
 				result = ocr.ocr(img_path, cls=False)
 				'''
