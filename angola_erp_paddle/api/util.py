@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 
-#Date Changed: 27/12/2022
+#Date Changed: 12/01/2023
 
 
 from __future__ import unicode_literals
@@ -54,6 +54,7 @@ def paddle_ocr_TEST(data,action = "OCR PLATES",tipodoctype = None):
 
 		#RETURNS Vehicle PLATE ....
 		matricula_final = 'MATRICULA INVALIDA'
+		tmp_matricula_final = ''
 		regex = r"^[a-zA-Z]{2}[\\s-]{0,1}[0-9]{2}[\\s-]{0,1}[0-9]{1,2}[\\s-]{0,1}[a-zA-Z]{2}$|^[a-zA-Z]{3}[\\s-]{0,1}[0-9]{2}[\\s-]{0,1}[0-9]{1,2}[\\s-]{0,1}$|^[0-9]{3}[\\s-]{0,1}[a-zA-Z]{2}[\\s-]{0,1}[0-9]{2,3}$|^[a-zA-Z]{2}[\\s-]{0,1}[0-9]{3}[\\s-]{0,1}[0-9]{2}$"
 
 		print ('len tmp_matricula ', len(tmp_matricula))
@@ -72,8 +73,34 @@ def paddle_ocr_TEST(data,action = "OCR PLATES",tipodoctype = None):
 						groupNum = groupNum + 1
 						print ("Group {groupNum} found at {start}-{end}: {group}".format(groupNum = groupNum, start = match.start(groupNum), end = match.end(groupNum), group = match.group(groupNum)))
 					matricula_final = match.group()
+			else:
+				#Special case when Plate has LD-XX in one line and XX-FF on the second line...
+				print ('aqui')
+				if len(tmp_matricula) == 2:
+					if not matricula_final:
+						#Starts with Letters
+						if ttmatr.split(',')[0:2].isalpha():
+							tmp_matricula_final = ttmatr.split(',')[0]
+						elif tmp_matricula_final and ttmatr.split(',')[0:2].isalnum():
+							#starts with Numbers like -01 or 12
+							if ttmatr.split(',')[0].startswith('-'):
+								tmp_matricula_final += ttmatr.split(',')[0]
+							else:
+								#adds - before
+								tmp_matricula_final += '-' + ttmatr.split(',')[0]
 
-
+			if tmp_matricula_final:
+				print ('matricula final tem ', matricula_final)
+				print ('tmp matricula final tem ', tmp_matricula_final)
+				mm = tmp_matricula_final.split(',')[0].replace(':','-').replace(' ','') # ttmatr.replace(':','-').replace(',','')
+				#Trying to match plate regex
+				matches = re.finditer(regex,mm.split()[0])
+				for matchNum, match in enumerate(matches, start=1):
+					print ("Match {matchNum} was found at {start}-{end}: {match}".format(matchNum = matchNum, start = match.start(), end = match.end(), match = match.group()))
+					for groupNum in range(0, len(match.groups())):
+						groupNum = groupNum + 1
+						print ("Group {groupNum} found at {start}-{end}: {group}".format(groupNum = groupNum, start = match.start(groupNum), end = match.end(groupNum), group = match.group(groupNum)))
+					matricula_final = match.group()
 
 		print ('Matricula final... ', matricula_final)
 		return matricula_final
@@ -158,6 +185,7 @@ def paddle_ocr(data,opcao='batch',action = "OCR PLATES",tipodoctype = None):
 
 			#RETURNS Vehicle PLATE ....
 			matricula_final = 'MATRICULA INVALIDA'
+			tmp_matricula_final = ''
 			regex = r"^[a-zA-Z]{2}[\\s-]{0,1}[0-9]{2}[\\s-]{0,1}[0-9]{1,2}[\\s-]{0,1}[a-zA-Z]{2}$|^[a-zA-Z]{3}[\\s-]{0,1}[0-9]{2}[\\s-]{0,1}[0-9]{1,2}[\\s-]{0,1}$|^[0-9]{3}[\\s-]{0,1}[a-zA-Z]{2}[\\s-]{0,1}[0-9]{2,3}$|^[a-zA-Z]{2}[\\s-]{0,1}[0-9]{3}[\\s-]{0,1}[0-9]{2}$"
 
 			print ('len tmp_matricula ', len(tmp_matricula))
@@ -166,8 +194,8 @@ def paddle_ocr(data,opcao='batch',action = "OCR PLATES",tipodoctype = None):
 				print ('ttmatr ',ttmatr)
 				if ttmatr.find('Predict time of') == -1:
 					#Possible plate
-					print (ttmatr.split(',')[0])
-					mm = ttmatr.split(',')[0].replace(':','-').replace(' ','') # ttmatr.replace(':','-').replace(',','')
+					print ('MM ', ttmatr.split(',')[0])
+					mm = ttmatr.split(',')[0].replace(':','-').replace(' ','').replace('·','-') # ttmatr.replace(':','-').replace(',','')
 					#Trying to match plate regex
 					matches = re.finditer(regex,mm.split()[0])
 					for matchNum, match in enumerate(matches, start=1):
@@ -177,7 +205,34 @@ def paddle_ocr(data,opcao='batch',action = "OCR PLATES",tipodoctype = None):
 							print ("Group {groupNum} found at {start}-{end}: {group}".format(groupNum = groupNum, start = match.start(groupNum), end = match.end(groupNum), group = match.group(groupNum)))
 						matricula_final = match.group()
 
+					#Special case when Plate has LD-XX in one line and XX-FF on the second line...
+					print ('aqui')
+					if len(tmp_matricula) == 2:
+						if matricula_final == 'MATRICULA INVALIDA':
+							#Starts with Letters
+							tt = ttmatr.split(',')[0]
+							if tt[0:2].isalpha():
+								tmp_matricula_final = ttmatr.split(',')[0]
+							elif tmp_matricula_final and tt[0:2].isalnum():
+								#starts with Numbers like -01 or 12
+								if ttmatr.split(',')[0].startswith('-'):
+									tmp_matricula_final += ttmatr.split(',')[0]
+								else:
+									#adds - before
+									tmp_matricula_final += '-' + ttmatr.split(',')[0]
 
+			if tmp_matricula_final:
+				print ('matricula final tem ', matricula_final)
+				print ('tmp matricula final tem ', tmp_matricula_final)
+				mm = tmp_matricula_final.split(',')[0].replace(':','-').replace(' ','') # ttmatr.replace(':','-').replace(',','')
+				#Trying to match plate regex
+				matches = re.finditer(regex,mm.split()[0])
+				for matchNum, match in enumerate(matches, start=1):
+					print ("Match {matchNum} was found at {start}-{end}: {match}".format(matchNum = matchNum, start = match.start(), end = match.end(), match = match.group()))
+					for groupNum in range(0, len(match.groups())):
+						groupNum = groupNum + 1
+						print ("Group {groupNum} found at {start}-{end}: {group}".format(groupNum = groupNum, start = match.start(groupNum), end = match.end(groupNum), group = match.group(groupNum)))
+					matricula_final = match.group()
 
 			print ('Matricula final... ', matricula_final)
 			return matricula_final
