@@ -142,7 +142,7 @@ def paddle_ocr(data,opcao='batch',action = "OCR PLATES",tipodoctype = None):
 				'--image_dir=' + filefinal1
 
 				#CHIN
-				run_ppocr = 'python3 /home/frappe/frappe-bench/apps/paddleocr/tools/infer/predict_system.py --det_model_dir="/home/frappe/frappe-bench/apps/paddleocr/ch_ppocr_server_v2.0_det_infer/" ' \
+				run_ppocr = 'cd /home/frappe/frappe-bench/apps/paddleocr && python3 /home/frappe/frappe-bench/apps/paddleocr/tools/infer/predict_system.py --det_model_dir="/home/frappe/frappe-bench/apps/paddleocr/ch_ppocr_server_v2.0_det_infer/" ' \
 				'--cls_model_dir="/home/frappe/frappe-bench/apps/paddleocr/ch_ppocr_mobile_v2.0_cls_infer/" ' \
 				'--rec_model_dir="/home/frappe/frappe-bench/apps/paddleocr/ch_ppocr_server_v2.0_rec_infer/" ' \
 				'--rec_image_shape="3,32,320" ' \
@@ -196,6 +196,12 @@ def paddle_ocr(data,opcao='batch',action = "OCR PLATES",tipodoctype = None):
 					#Possible plate
 					print ('MM ', ttmatr.split(',')[0])
 					mm = ttmatr.split(',')[0].replace(':','-').replace(' ','').replace('·','-') # ttmatr.replace(':','-').replace(',','')
+
+					#Exception if ends with -LETTER+5(might be Z)
+					if mm.endswith('5'):
+						mm1 = mm[:len(mm)-1]
+						mm = mm1 + 'Z'
+
 					#Trying to match plate regex
 					matches = re.finditer(regex,mm.split()[0])
 					for matchNum, match in enumerate(matches, start=1):
