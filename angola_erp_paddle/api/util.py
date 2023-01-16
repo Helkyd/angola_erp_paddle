@@ -202,6 +202,7 @@ def paddle_ocr(data,opcao='batch',action = "OCR PLATES",tipodoctype = None):
 						mm1 = mm[:len(mm)-1]
 						mm = mm1 + 'Z'
 
+
 					#Trying to match plate regex
 					matches = re.finditer(regex,mm.split()[0])
 					for matchNum, match in enumerate(matches, start=1):
@@ -231,6 +232,20 @@ def paddle_ocr(data,opcao='batch',action = "OCR PLATES",tipodoctype = None):
 				print ('matricula final tem ', matricula_final)
 				print ('tmp matricula final tem ', tmp_matricula_final)
 				mm = tmp_matricula_final.split(',')[0].replace(':','-').replace(' ','') # ttmatr.replace(':','-').replace(',','')
+
+				#FIX 16-01-2023; Check if ends with -1A ( one number and a letter)
+				#Number 1 is I
+				print ('len MM ', len(mm))
+				print ('mm ', mm)
+				if len(mm) == 11:
+					a1 = mm[9:]
+					if a1[0].isalnum() and a1[0] == "1":
+						#Replace 1 with I
+						a2 = "I" + a1[1]
+						mm1 = mm.replace(mm[9:],a2)
+						mm = mm1
+
+
 				#Trying to match plate regex
 				matches = re.finditer(regex,mm.split()[0])
 				for matchNum, match in enumerate(matches, start=1):
